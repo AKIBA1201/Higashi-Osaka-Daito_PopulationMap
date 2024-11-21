@@ -1,7 +1,10 @@
 # layout.py
+
+# dash.dcc ドロップダウンやグラフ描画などのコンポーネントが含まれる
+# dash.html HTMLの基本要素をPythonで記述できる
 from dash import dcc, html
 
-# 変数選択オプションの定義
+# ドロップダウンメニューの選択肢を定義する辞書オブジェクト[キー(ラベル):値]
 variable_options = {
     # 生徒候補
     "男女20-39歳": "age_20_39",
@@ -51,44 +54,45 @@ variable_options = {
 }
 
 # レイアウト構成
+# Dashアプリ全体のレイアウトを定義するトップレベルの<div>タグ
 layout = html.Div([
+    # サブレイアウトを構成する<div>タグ。複数のUI要素を内包
     html.Div([
-        html.Div(style={'height': '20px'}),
-
-        # 自治体選択ドロップダウン
+        # 市選択ドロップダウン
         dcc.Dropdown(
             id='city_selection',
             options=[
                 {'label': '東大阪市', 'value': 'higashiosaka'},
                 {'label': '大東市', 'value': 'daitou'},
                 {'label': '東大阪市＆大東市', 'value': 'higashiosaka_daitou'}
-
-                # 他の自治体を追加する場合はここに追加
             ],
-            value='higashiosaka',  # デフォルト値を設定
-            placeholder="▼選択してください",
-            style={'width': '100%'}
+            value='higashiosaka_daitou',  # デフォルト値を設定
+            placeholder="▼選択してください",# 何も選択されていない場合表示
+            style={'width': '90%'}# ドロップダウンの幅
         ),
-
-        html.Div(style={'height': '10px'}),
 
         # 変数選択ドロップダウン（総人口・男性・女性・年齢別を含む）
         dcc.Dropdown(
             id='variable',
-            options=[{'label': k, 'value': v} for k, v in variable_options.items()],
+            #
+            options=[
+                {'label': k, 'value': v}# ドロップダウンのラベル（k）と値（v）を対応付けた辞書を作成
+                  for k, v in variable_options.items()],# variable_options辞書からキー（k）と値（v）を順番に取得
             value='age_20_39',  # デフォルト値を設定
-            placeholder="▼選択してください",
-            style={'width': '100%'}
+            placeholder="▼選択してください",# 何も選択されていない場合表示
+            style={'width': '90%'}# ドロップダウンの幅
         ),
 
-        html.Div(style={'height': '10px'}),
-
         # バープロット
-        dcc.Graph(id='barPlot', style={'height': '600px'})
-    ], style={'width': '25%', 'display': 'inline-block', 'verticalAlign': 'top'}),
+        dcc.Graph(id='barPlot', style={'height': '640px','margin-left': '-50px'})# バープロット（棒グラフ）を表示するグラフコンポーネント
+    ], style={'width': '20%', 'display': 'inline-block', 'verticalAlign': 'top',}),# サイドバー全体のスタイル設定
 
     # 地図表示部分
-    html.Div([
-        dcc.Graph(id='mapPlot', style={'height': '750px', 'width': '100%'})
-    ], style={'width': '75%', 'display': 'inline-block', 'verticalAlign': 'top'})
+    html.Div([# 地図グラフを表示するための<div>タグ
+        dcc.Graph(# Dashでグラフを表示するためのコンポーネント
+            id='mapPlot', style={'height': '700px', 'width': '100%'})# グラフの高さ、幅を親要素に対して設定
+    ], style={'width': '80%',# 親レイアウト全体の%の幅を割り当てる
+               'display': 'inline-block',# 他のコンポーネント（サイドバー）と横並びになるよう設定
+                 'verticalAlign': 'top',
+                 'margin-left': '-50px'})# 横並びにした際に、上端を他の要素に揃える
 ])
