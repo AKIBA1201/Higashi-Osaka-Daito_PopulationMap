@@ -1,4 +1,4 @@
-# app.py
+# app.p
 
 from dash import Dash  # Dashフレームワークをインポート。Webアプリケーションの作成に使用される
 import webbrowser       # デフォルトのWebブラウザを操作するためのモジュール
@@ -40,7 +40,7 @@ if __name__ == '__main__':
     local_ip = get_local_ip()
     # Timerモジュールで1秒後に実行。webbrowserモジュールでwebブラウザで指定したURLを開く
     # fで文字列の中に変数を{}で埋め込めるように。.start()でタイマー開始
-    Timer(0.1, lambda: webbrowser.open(f'http://{local_ip}:{port}')).start()
+    Timer(1, lambda: webbrowser.open(f'http://{local_ip}:{port}')).start()
     # try～exceptでエラーが発生するかもしれないコードを実行する形にし、エラー時クラッシュせずにエラー文表示
     try:
         # IPアドレスを含むアドレスの表示
@@ -49,7 +49,7 @@ if __name__ == '__main__':
         # host='0.0.0.0'で同じネットワーク内デバイスからもアクセス可能に
         # さっき入力したポート番号で実行
         # デバッグモードONにする。その際のサーバーのリロード機能を無効にして二重起動を防ぐ場合はuse_reloader=False
-        app.run_server(host='0.0.0.0', port=port, debug=True, use_reloader=True)
+        app.run_server(host='0.0.0.0', port=port, debug=True, use_reloader=False)
     # OSErrorが発生した時にその情報をeに格納
     except OSError as e:
         # ログにエラーの詳細を記録（例: "サーバー起動エラー: [Errno 98] Address already in use"）
