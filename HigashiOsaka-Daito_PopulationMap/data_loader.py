@@ -12,13 +12,15 @@ def load_municipality_data(municipality_name):
     logging.debug(f"Loading data for municipality: {municipality_name}")
     print(f"Loading data for municipality: {municipality_name}")
     
-    # 人口データの読み込み
-    pop_file = os.path.join(data_dir, f"{municipality_name}_population.xlsx")
+    # CSVファイルを指定
+    pop_file = os.path.join(data_dir, f"{municipality_name}_population.csv")
     try:
-        population_data = pd.read_excel(pop_file)
+        # CSVファイルを読み込む（エンコーディングは必要に応じて変更）
+        population_data = pd.read_csv(pop_file, encoding='utf-8')
         logging.debug(f"Population data columns before processing: {population_data.columns.tolist()}")
         print(f"Population data columns before processing: {population_data.columns.tolist()}")
         
+        # 列名を加工して整える
         population_data.rename(columns={'NAME': 'town_name'}, inplace=True)
         population_data.columns = population_data.columns.str.replace(r'[\n\r\s　]+', '', regex=True).str.lower()
         population_data.columns = population_data.columns.str.replace('歳', '', regex=False)
@@ -29,7 +31,7 @@ def load_municipality_data(municipality_name):
             raise KeyError("'town_name' 列が population_data に存在しません。")
         
         # 年齢別変数の生成
-        population_data = population_data.assign(
+        population_data = population_data.assign( # 年齢区分や性別ごとの集計値を新たな列として追加
             age_0_4=population_data['０～４'],
             age_5_9=population_data['５～９'],
             age_10_14=population_data['１０～１４'],
@@ -82,6 +84,7 @@ def load_municipality_data(municipality_name):
             age_60_69=population_data['６０～６４'] + population_data['６５～６９'],
         )
         
+        # 列名を簡潔に変更
         population_data.rename(columns={
             '人口総数': 'population_total',
             '男性総数': 'male_total',
@@ -111,7 +114,7 @@ def load_municipality_data(municipality_name):
             if file.endswith('.shp') and not file.startswith('~$') and file.lower() == expected_shape_filename:
                 shape_file = os.path.join(data_dir, file)
                 break
-
+        
         if not shape_file:
             logging.error(f"No shapefile found for {municipality_name}")
             print(f"No shapefile found for {municipality_name}")
@@ -129,7 +132,7 @@ def load_municipality_data(municipality_name):
         print(f"シェイプファイルの読み込み中にエラーが発生しました: {e}")
         raise e
 
-    # マージ用の列名を特定
+    # マージ用の列を探す
     possible_merge_columns = ['s_name', 'moji', 'name', '町名', 'town_name']
     map_data_town.columns = map_data_town.columns.str.lower()
     merge_left_on = next((col for col in possible_merge_columns if col in map_data_town.columns), None)
@@ -140,12 +143,10 @@ def load_municipality_data(municipality_name):
         print(f"利用可能な列名: {map_data_town.columns.tolist()}")
         raise KeyError("マージ用の列がシェイプファイルに存在しません。")
 
-    # マージ処理
     try:
         population_data['town_name'] = population_data['town_name'].str.strip().str.lower()
         map_data_town[merge_left_on] = map_data_town[merge_left_on].astype(str).str.strip().str.lower()
         map_data_town = map_data_town.merge(population_data, left_on=merge_left_on, right_on='town_name', how='left')
-        
         logging.debug(f"After merge, map_data_town columns: {map_data_town.columns.tolist()}")
         print(f"After merge, map_data_town columns: {map_data_town.columns.tolist()}")
     except Exception as e:
@@ -156,7 +157,6 @@ def load_municipality_data(municipality_name):
     logging.info("データのマージが完了しました。")
     print("データのマージが完了しました。")
 
-    # デバッグ用に列名を出力
     logging.debug(f"Final map_data_town columns: {map_data_town.columns.tolist()}")
     print(f"Final map_data_town columns: {map_data_town.columns.tolist()}")
 
